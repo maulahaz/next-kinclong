@@ -1,26 +1,48 @@
 import { db } from "@/lib/db";
 import { carsTable, contractsTable, washesTable } from "@/lib/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-export async function createCar(data: { customerId: number; type: "small" | "big"; plateNumber: string }) {
+interface CarInput {
+  customerId: number;
+  type: "small" | "big";
+  plateNumber: string;
+  brand?: string;
+  model?: string;
+  color?: string;
+  imageUrl?: string;
+  notes?: string;
+}
+
+export async function createCar(data: CarInput) {
   const [car] = await db
     .insert(carsTable)
     .values({
       customerId: data.customerId,
       type: data.type,
       plateNumber: data.plateNumber,
+      brand: data.brand || null,
+      model: data.model || null,
+      color: data.color || null,
+      imageUrl: data.imageUrl || null,
+      notes: data.notes || null,
     })
     .returning();
 
   return car;
 }
 
-export async function updateCar(id: number, data: { type: "small" | "big"; plateNumber: string }) {
+export async function updateCar(id: number, data: Omit<CarInput, "customerId">) {
   const [car] = await db
     .update(carsTable)
     .set({
       type: data.type,
       plateNumber: data.plateNumber,
+      brand: data.brand || null,
+      model: data.model || null,
+      color: data.color || null,
+      imageUrl: data.imageUrl || null,
+      notes: data.notes || null,
+      updatedAt: new Date(),
     })
     .where(eq(carsTable.id, id))
     .returning();
@@ -40,15 +62,12 @@ export async function deleteCar(id: number) {
   });
 
   await db.transaction(async (tx) => {
-    // Delete washes for all contracts associated with this car
     for (const contract of contracts) {
       await tx.delete(washesTable).where(eq(washesTable.contractId, contract.id));
     }
-    // Delete contracts
     if (contracts.length > 0) {
       await tx.delete(contractsTable).where(eq(contractsTable.carId, id));
     }
-    // Delete car
     await tx.delete(carsTable).where(eq(carsTable.id, id));
   });
 

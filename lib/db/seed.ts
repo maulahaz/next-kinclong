@@ -84,9 +84,36 @@ async function seed() {
     // 4. Insert Cars
     console.log('Inserting cars...');
     const insertedCars = await db.insert(schema.carsTable).values([
-      { customerId: customerFatima.id, type: 'small', plateNumber: 'A 12345' },
-      { customerId: customerFatima.id, type: 'big', plateNumber: 'D 67890' },
-      { customerId: customerAhmed.id, type: 'small', plateNumber: 'E 55555' },
+      {
+        customerId: customerFatima.id,
+        type: 'small',
+        plateNumber: 'A 12345',
+        imageUrl: 'https://placehold.co/200x50/C0C0C0/000000?text=Toyota%20Yaris',
+        brand: 'Toyota',
+        model: 'Yaris',
+        color: 'Silver',
+        notes: 'Year 2012, There is a scratch on the left door',
+      },
+      {
+        customerId: customerFatima.id,
+        type: 'big',
+        plateNumber: 'D 67890',
+        imageUrl: 'https://placehold.co/200x50/000000/FFFFFF?text=Honda%20Pilot',
+        brand: 'Honda',
+        model: 'Pilot',
+        color: 'Black',
+        notes: 'Year 2018, There is a dent on the rear bumper',
+      },
+      {
+        customerId: customerAhmed.id,
+        type: 'small',
+        plateNumber: 'E 55555',
+        imageUrl: 'https://placehold.co/200x50/FFFFFF/000000?text=Daihatsu%20Ayla',
+        brand: 'Daihatsu',
+        model: 'Ayla',
+        color: 'White',
+        notes: 'Year 2015, No damage',
+      },
     ]).returning();
 
     const fatimaCar1 = insertedCars[0];

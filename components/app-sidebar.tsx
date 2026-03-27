@@ -43,7 +43,7 @@ export async function AppSidebar({ user }: AppSidebarProps) {
     ],
     customer: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "My Cars", url: "/dashboard/my-cars", icon: Car },
+      // { title: "My Cars", url: "/dashboard/my-cars", icon: Car },
       { title: "My Contracts", url: "/dashboard/my-contracts", icon: FileText },
       { title: "Account Profile", url: "/dashboard/profile", icon: Users },
     ],

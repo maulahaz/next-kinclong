@@ -67,8 +67,13 @@ export const carsTable = pgTable('cars', {
   customerId: integer('customer_id').references(() => customersTable.id).notNull(),
   type: carTypeEnum('type').notNull(),
   plateNumber: varchar('plate_number', { length: 50 }).notNull(),
+  brand: varchar('brand', { length: 50 }), //--Use as another brand. Eq. KIA, Honda, Toyota, etc
+  model: varchar('model', { length: 50 }), //--Use as another model. Eq. Carnival, Brio, Avanza, etc
+  color: varchar('color', { length: 50 }), //--Use as another color. Eq. Black, White, Silver, etc
   imageUrl: varchar('image_url', { length: 500 }),
+  notes: varchar('notes', { length: 500 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 export const packagesTable = pgTable('packages', {
