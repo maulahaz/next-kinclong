@@ -1,0 +1,30 @@
+.next/dev/types/validator.ts(144,31): error TS2344: Type 'typeof import("E:/09 Projects/next-kinclong/app/api/cars/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/cars/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; data: { id: number; customerId: number; type: "small" | "big"; plateNumber: string; imageUrl: string | null; createdAt: Date; }; }> | NextResponse<...>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(162,31): error TS2344: Type 'typeof import("E:/09 Projects/next-kinclong/app/api/contracts/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/contracts/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; data: { id: number; customerId: number; carId: number; packageId: number | null; packageType: string; totalWashes: number; completedWashes: number; status: "active" | ... 1 more ... | "cancelled"; createdAt: Date...' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(180,31): error TS2344: Type 'typeof import("E:/09 Projects/next-kinclong/app/api/customers/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/customers/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; data: { id: number; name: string; email: string; passwordHash: string | null; role: "admin" | "staff" | "customer"; createdAt: Date; }; }> | NextResponse<...>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(198,31): error TS2344: Type 'typeof import("E:/09 Projects/next-kinclong/app/api/packages/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/packages/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; data: { id: number; name: string; description: string | null; duration: number; price: number; includes: unknown; popularity: number; isActive: boolean; createdAt: Date; }; }> | NextResponse<...>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(42,39): error TS2307: Cannot find module '../../src/app/page.js' or its corresponding type declarations.
+.next/types/validator.ts(57,39): error TS2307: Cannot find module '../../src/app/layout.js' or its corresponding type declarations.
