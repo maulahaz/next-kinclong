@@ -46,6 +46,10 @@ export async function loginWithIdentifier(id: string, password: string) {
 }
 
 export async function registerUser(data: { name: string; id: string; password: string }) {
+  if (!data.password || data.password.length < 6) {
+    return { error: "Password must be at least 6 characters" };
+  }
+
   const isEmail = data.id.includes("@");
 
   const existingUser = await db
@@ -67,16 +71,17 @@ export async function registerUser(data: { name: string; id: string; password: s
         name: data.name,
         email: isEmail ? data.id : null,
         phone: isEmail ? null : data.id,
-        role: "customer",
+        role: "unverified",
         passwordHash: hashedPassword,
         isActive: false,
       })
       .returning();
 
-    await tx.insert(customersTable).values({
-      userId: user.id,
-      phone: !isEmail ? data.id : "N/A",
-    });
+    //--Insert to customers:
+    // await tx.insert(customersTable).values({
+    //   userId: user.id,
+    //   phone: !isEmail ? data.id : "N/A",
+    // });
 
     const cookieStore = await cookies();
     cookieStore.set(COOKIE_NAME, user.id.toString(), {
@@ -86,7 +91,9 @@ export async function registerUser(data: { name: string; id: string; password: s
       path: "/",
     });
 
-    return { success: true };
+    //--Send Message that wait for admin approval:
+    return { error: true, message: "Account created successfully! Please wait for admin approval." };
+    // return { success: true};
   });
 }
 

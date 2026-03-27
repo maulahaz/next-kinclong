@@ -51,11 +51,11 @@ async function seed() {
     const hashedPassword = await bcrypt.hash('pass-123', 10)
     console.log('Inserting users...');
     const insertedUsers = await db.insert(schema.usersTable).values([
-      { name: 'John Admin', email: 'admin@kinclong.com', phone: '08111111111', role: 'admin', passwordHash: hashedPassword, isActive: true },
-      { name: 'Ali Washer', email: 'ali@kinclong.com', phone: '08111111112', role: 'staff', passwordHash: hashedPassword, isActive: true },
-      { name: 'Omar Staff', email: 'omar@kinclong.com', phone: '08111111113', role: 'staff', passwordHash: hashedPassword, isActive: true },
-      { name: 'Fatima Customer', email: 'fatima@kinclong.com', phone: '08111111114', role: 'customer', passwordHash: hashedPassword, isActive: true },
-      { name: 'Ahmed Customer', email: 'ahmed@kinclong.com', phone: '08111111115', role: 'customer', passwordHash: hashedPassword, isActive: true },
+      { name: 'John Admin', email: 'admin@mail.com', phone: '0551234561', role: 'admin', passwordHash: hashedPassword, isActive: true },
+      { name: 'Ali Washer', email: 'ali@mail.com', phone: '0551234562', role: 'staff', passwordHash: hashedPassword, isActive: true },
+      { name: 'Omar Staff', email: 'omar@mail.com', phone: '0551234563', role: 'staff', passwordHash: hashedPassword, isActive: true },
+      { name: 'Fatima Customer', email: 'fatima@mail.com', phone: '0551234564', role: 'customer', passwordHash: hashedPassword, isActive: true },
+      { name: 'Ahmed Customer', email: 'ahmed@mail.com', phone: '0551234565', role: 'customer', passwordHash: hashedPassword, isActive: true },
     ]).returning();
 
     const admin = insertedUsers[0];
@@ -67,15 +67,15 @@ async function seed() {
     // 2.5 Insert Staffs
     console.log('Inserting staffs...');
     await db.insert(schema.staffsTable).values([
-      { userId: staff1.id, phone: '08555111222', address: 'Jl. Merdeka No 10, Jakarta', position: 'Car Washer', salary: 3500000, hireDate: new Date('2024-01-15') },
-      { userId: staff2.id, phone: '08555333444', address: 'Jl. Sudirman No 50, Jakarta', position: 'Supervisor', salary: 5000000, hireDate: new Date('2023-11-20') },
+      { userId: staff1.id, phone: '0551234562', address: 'Jl. Merdeka No 10, Jakarta', position: 'Car Washer', salary: 3500000, hireDate: new Date('2024-01-15') },
+      { userId: staff2.id, phone: '0551234563', address: 'Jl. Sudirman No 50, Jakarta', position: 'Supervisor', salary: 5000000, hireDate: new Date('2023-11-20') },
     ]);
 
     // 3. Insert Customers (Link to users)
     console.log('Inserting customers...');
     const insertedCustomers = await db.insert(schema.customersTable).values([
-      { userId: userFatima.id, phone: '08123456789', email: 'fatima@contact.com', address: 'Jl. Melati No 1, Jakarta', points: 150, isActive: true },
-      { userId: userAhmed.id, phone: '08198765432', email: 'ahmed@contact.com', address: 'Jl. Mawar No 2, Jakarta', points: 50, isActive: true },
+      { userId: userFatima.id, phone: '0551234564', email: 'fatima@contact.com', address: 'Jl. Melati No 1, Jakarta', points: 150, isActive: true },
+      { userId: userAhmed.id, phone: '0551234565', email: 'ahmed@contact.com', address: 'Jl. Mawar No 2, Jakarta', points: 50, isActive: true },
     ]).returning();
 
     const customerFatima = insertedCustomers[0];

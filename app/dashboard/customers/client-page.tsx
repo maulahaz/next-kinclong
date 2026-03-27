@@ -1,17 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoreHorizontal, Edit, Trash, Car as CarIcon, FileText, UserPlus, Loader2, Eye } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Car as CarIcon, FileText, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+interface UnverifiedUser {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+}
 
 export function CustomersClientPage({ customers }: { customers: any[] }) {
   const router = useRouter();
@@ -22,31 +28,56 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Form states
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Unverified users list
+  const [unverifiedUsers, setUnverifiedUsers] = useState<UnverifiedUser[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  // Customer-specific form states (optional fields)
+  const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [address, setAddress] = useState("");
   const [points, setPoints] = useState<number>(0);
   const [isActive, setIsActive] = useState(true);
 
+  // Edit-only user fields
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+
   const resetForm = () => {
-    setName("");
-    setEmail("");
-    setPhone("");
+    setSelectedUserId("");
+    setContactPhone("");
     setContactEmail("");
     setAddress("");
     setPoints(0);
     setIsActive(true);
+    setEditName("");
+    setEditEmail("");
     setSelectedCustomer(null);
+  };
+
+  const fetchUnverifiedUsers = async () => {
+    try {
+      const res = await fetch("/api/users/unverified");
+      const json = await res.json();
+      if (json.success) {
+        setUnverifiedUsers(json.data);
+      }
+    } catch {
+      // silent
+    }
+  };
+
+  const openAdd = () => {
+    resetForm();
+    fetchUnverifiedUsers();
+    setIsAddOpen(true);
   };
 
   const openEdit = (customer: any) => {
     setSelectedCustomer(customer);
-    setName(customer.user?.name || "");
-    setEmail(customer.user?.email || "");
-    setPhone(customer.phone || "");
+    setEditName(customer.user?.name || "");
+    setEditEmail(customer.user?.email || "");
+    setContactPhone(customer.phone || "");
     setContactEmail(customer.email || "");
     setAddress(customer.address || "");
     setPoints(customer.points || 0);
@@ -61,12 +92,23 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedUserId) {
+      toast.error("Please select an unverified user");
+      return;
+    }
     setIsLoading(true);
-
     try {
       const res = await fetch("/api/customers", {
         method: "POST",
-        body: JSON.stringify({ name, email, phone, contactEmail, address, points, isActive }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: parseInt(selectedUserId),
+          phone: contactPhone || undefined,
+          email: contactEmail || undefined,
+          address: address || undefined,
+          points,
+          isActive,
+        }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
@@ -88,7 +130,16 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
     try {
       const res = await fetch(`/api/customers/${selectedCustomer.id}`, {
         method: "PUT",
-        body: JSON.stringify({ name, email, phone, contactEmail, address, points, isActive }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+          phone: contactPhone || undefined,
+          contactEmail: contactEmail || undefined,
+          address: address || undefined,
+          points,
+          isActive,
+        }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
@@ -124,6 +175,8 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
     }
   };
 
+  const selectedUser = unverifiedUsers.find((u) => u.id === parseInt(selectedUserId));
+
   return (
     <>
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
@@ -133,7 +186,7 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
             View all verified clients in the Kinclong database.
           </p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
+        <Button onClick={openAdd} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
           <UserPlus className="w-4 h-4 mr-2" /> Add Customer
         </Button>
       </div>
@@ -143,11 +196,11 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
           <Table>
             <TableHeader className="bg-primary/5">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Customer Ref</TableHead>
+                <TableHead className="font-semibold text-foreground">Ref</TableHead>
                 <TableHead className="font-semibold text-foreground">Name</TableHead>
-                <TableHead className="font-semibold text-foreground bg-primary/0">Phone</TableHead>
-                <TableHead className="font-semibold text-foreground">Owned Cars</TableHead>
-                <TableHead className="font-semibold text-foreground">Active Packages</TableHead>
+                <TableHead className="font-semibold text-foreground">Phone</TableHead>
+                <TableHead className="font-semibold text-foreground">Cars</TableHead>
+                <TableHead className="font-semibold text-foreground">Packages</TableHead>
                 <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -165,11 +218,11 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
                   <TableRow key={customer.id} className="hover:bg-primary/5 transition-colors">
                     <TableCell className="font-medium text-xs text-muted-foreground">CST-{customer.id}</TableCell>
                     <TableCell className="font-semibold text-foreground">{customer.user?.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
+                    <TableCell className="text-muted-foreground">{customer.user?.phone || customer.phone || "—"}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-sm">
                         <CarIcon className="w-4 h-4 text-primary" />
-                        {customer.cars?.length || 0} registered
+                        {customer.cars?.length || 0}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -178,7 +231,7 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
                         {activePackages > 0 ? (
                           <span className="text-primary font-medium">{activePackages} active</span>
                         ) : (
-                          <span className="text-muted-foreground">0 active</span>
+                          <span className="text-muted-foreground">0</span>
                         )}
                       </div>
                     </TableCell>
@@ -190,10 +243,10 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(customer)} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" /> Edit User
+                            <Edit className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openDelete(customer)} className="cursor-pointer text-destructive focus:text-destructive">
-                            <Trash className="mr-2 h-4 w-4" /> Delete Account
+                            <Trash className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -206,7 +259,7 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
         </div>
       </Card>
 
-      {/* ADD DIALOG */}
+      {/* ADD DIALOG — Select from unverified users */}
       <Dialog open={isAddOpen} onOpenChange={(v) => { if (!v) { setIsAddOpen(false); resetForm(); } }}>
         <DialogContent>
           <form onSubmit={handleAdd}>
@@ -215,39 +268,64 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto px-1">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name (Login)</Label>
-                <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" />
+                <Label htmlFor="userId">Select Registered User</Label>
+                <select
+                  id="userId"
+                  required
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">— Choose an unverified user —</option>
+                  {unverifiedUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.email || u.phone || `ID #${u.id}`})
+                    </option>
+                  ))}
+                </select>
+                {unverifiedUsers.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No unverified users available. Users must register first.</p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address (Login)</Label>
-                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input id="phone" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08123456789" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email (Optional)</Label>
-                <Input id="contactEmail" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="contact@example.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. Sudirman 123" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="points">Points</Label>
-                <Input id="points" type="number" value={points} onChange={(e) => setPoints(parseInt(e.target.value))} />
-              </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
-                <Label htmlFor="isActive" className="text-sm font-medium leading-none">Active Customer</Label>
+
+              {selectedUser && (
+                <div className="rounded-md bg-primary/5 border border-primary/10 p-3 text-sm space-y-1">
+                  <p className="font-semibold text-foreground">{selectedUser.name}</p>
+                  {selectedUser.email && <p className="text-muted-foreground text-xs">Email: {selectedUser.email}</p>}
+                  {selectedUser.phone && <p className="text-muted-foreground text-xs">Phone: {selectedUser.phone}</p>}
+                </div>
+              )}
+
+              <div className="border-t border-border pt-4 space-y-4">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Optional Customer Details</p>
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone">Alt. Phone</Label>
+                  <Input id="contactPhone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="Other phone number" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail">Alt. Email</Label>
+                  <Input id="contactEmail" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="Other email" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. Sudirman 123" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="points">Points</Label>
+                  <Input id="points" type="number" value={points} onChange={(e) => setPoints(parseInt(e.target.value) || 0)} />
+                </div>
+                {/* --Disable isActive from 'customers' table, let it control from 'users' table-- */}
+                {/* <div className="flex items-center space-x-2 pt-1">
+                  <input type="checkbox" id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+                  <Label htmlFor="isActive" className="text-sm font-medium leading-none">Active Customer</Label>
+                </div> */}
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || !selectedUserId}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
+                Confirm
               </Button>
             </DialogFooter>
           </form>
@@ -263,32 +341,37 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto px-1">
               <div className="space-y-2">
-                <Label htmlFor="edit-name">Full Name (Login)</Label>
-                <Input id="edit-name" required value={name} onChange={(e) => setName(e.target.value)} />
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input id="edit-name" required value={editName} onChange={(e) => setEditName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-email">Email Address (Login)</Label>
-                <Input id="edit-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Label htmlFor="edit-email">Login Email</Label>
+                <Input id="edit-email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-phone">Phone Number *</Label>
-                <Input id="edit-phone" required value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-contactEmail">Contact Email</Label>
-                <Input id="edit-contactEmail" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-address">Address</Label>
-                <Input id="edit-address" value={address} onChange={(e) => setAddress(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-points">Points</Label>
-                <Input id="edit-points" type="number" value={points} onChange={(e) => setPoints(parseInt(e.target.value))} />
-              </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
-                <Label htmlFor="edit-isActive" className="text-sm font-medium leading-none">Active Customer</Label>
+
+              <div className="border-t border-border pt-4 space-y-4">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Optional Contact</p>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Alt. Phone</Label>
+                  <Input id="edit-phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contactEmail">Alt. Email</Label>
+                  <Input id="edit-contactEmail" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-address">Address</Label>
+                  <Input id="edit-address" value={address} onChange={(e) => setAddress(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-points">Points</Label>
+                  <Input id="edit-points" type="number" value={points} onChange={(e) => setPoints(parseInt(e.target.value) || 0)} />
+                </div>
+                {/* --Disable isActive from 'customers' table, let it control from 'users' table-- */}
+                {/* <div className="flex items-center space-x-2 pt-1">
+                  <input type="checkbox" id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+                  <Label htmlFor="edit-isActive" className="text-sm font-medium leading-none">Active Customer</Label>
+                </div> */}
               </div>
             </div>
             <DialogFooter>

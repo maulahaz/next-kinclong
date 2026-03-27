@@ -1,7 +1,7 @@
 import { pgTable, serial, varchar, boolean, integer, timestamp, pgEnum, json } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-export const roleEnum = pgEnum('role', ['admin', 'staff', 'customer']);
+export const roleEnum = pgEnum('role', ['admin', 'staff', 'customer', 'unverified']);
 export const carTypeEnum = pgEnum('car_type', ['small', 'big']);
 export const contractStatusEnum = pgEnum('contract_status', ['active', 'completed', 'cancelled']);
 export const washTypeEnum = pgEnum('wash_type', ['inside', 'outside']);
@@ -29,7 +29,7 @@ export const usersTable = pgTable('users', {
   email: varchar('email', { length: 255 }).unique(),
   phone: varchar('phone', { length: 50 }).unique(),
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
-  role: roleEnum('role').default('customer').notNull(),
+  role: roleEnum('role').default('unverified').notNull(),
   isActive: boolean('is_active').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
