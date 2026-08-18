@@ -1,15 +1,14 @@
 import { db } from "@/lib/db";
 import { washesTable, contractsTable, carsTable, customersTable, usersTable } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, lt } from "drizzle-orm";
 
 export async function getPendingTasks() {
   const pendingWashes = await db
     .select({
-      id: washesTable.id,
-      type: washesTable.type,
-      status: washesTable.status,
-      createdAt: washesTable.createdAt,
-      contractId: contractsTable.id,
+      id: contractsTable.id,
+      type: contractsTable.packageType,
+      completed: contractsTable.completedWashes,
+      target: contractsTable.totalWashes,
       car: {
         plateNumber: carsTable.plateNumber,
         type: carsTable.type,
@@ -18,13 +17,33 @@ export async function getPendingTasks() {
         name: usersTable.name,
       },
     })
-    .from(washesTable)
-    .innerJoin(contractsTable, eq(washesTable.contractId, contractsTable.id))
+    .from(contractsTable)
     .innerJoin(carsTable, eq(contractsTable.carId, carsTable.id))
     .innerJoin(customersTable, eq(contractsTable.customerId, customersTable.id))
     .innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
-    .where(eq(washesTable.status, "pending"))
-    .orderBy(washesTable.createdAt);
+    .where(lt(contractsTable.completedWashes, contractsTable.totalWashes))
+    .orderBy(contractsTable.id);
+    // .select({
+    //   id: washesTable.id,
+    //   type: washesTable.type,
+    //   status: washesTable.status,
+    //   createdAt: washesTable.createdAt,
+    //   contractId: contractsTable.id,
+    //   car: {
+    //     plateNumber: carsTable.plateNumber,
+    //     type: carsTable.type,
+    //   },
+    //   customer: {
+    //     name: usersTable.name,
+    //   },
+    // })
+    // .from(washesTable)
+    // .innerJoin(contractsTable, eq(washesTable.contractId, contractsTable.id))
+    // .innerJoin(carsTable, eq(contractsTable.carId, carsTable.id))
+    // .innerJoin(customersTable, eq(contractsTable.customerId, customersTable.id))
+    // .innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
+    // .where(eq(washesTable.status, "pending"))
+    // .orderBy(washesTable.createdAt);
 
   return pendingWashes;
 }
@@ -32,15 +51,26 @@ export async function getPendingTasks() {
 export async function completeWashTask(
   washId: number,
   staffId: number,
-  imageUrl: string
+  imageUrl: string,
+  washedDate: string
 ) {
   // 1. Update the wash record
   const [updatedWash] = await db
+    // .insert(washesTable)
+    // .values({
+    //   type: 
+    //   status: "done", // Washed mark as done, waiting for customer acknowledgment
+    //   completedBy: staffId,
+    //   imageUrl,
+    //   createdAt: new Date(`${washedDate}T00:00:00`),
+    // })
+    // .returning();
     .update(washesTable)
     .set({
-      status: "done", // Mark as done, waiting for customer acknowledgment
+      status: "done", // Washed mark as done, waiting for customer acknowledgment
       completedBy: staffId,
       imageUrl,
+      createdAt: new Date(`${washedDate}T00:00:00`),
     })
     .where(eq(washesTable.id, washId))
     .returning();

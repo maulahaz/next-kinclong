@@ -4,7 +4,7 @@ import { eq, desc } from "drizzle-orm";
 
 export async function getAllPackages() {
   return await db.query.packagesTable.findMany({
-    orderBy: [desc(packagesTable.createdAt)],
+    orderBy: [packagesTable.name],
   });
 }
 

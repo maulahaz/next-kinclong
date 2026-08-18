@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar"
-import { Users, Car, FileText, CheckSquare, BarChart, LogOut, LayoutDashboard, Settings, Package } from "lucide-react";
+import { Users, Car, FileText, CheckSquare, BarChart, LogOut, LayoutDashboard, Settings, Package, Sparkles } from "lucide-react";
 import { getSettings } from "@/services/settings";
 type AppSidebarProps = {
   user: {
@@ -30,6 +30,7 @@ export async function AppSidebar({ user }: AppSidebarProps) {
       { title: "Customers", url: "/dashboard/customers", icon: Users },
       { title: "Cars", url: "/dashboard/cars", icon: Car },
       { title: "Packages", url: "/dashboard/packages", icon: Package },
+      { title: "Wash Types", url: "/dashboard/wash-types", icon: Sparkles },
       { title: "Contracts", url: "/dashboard/contracts", icon: FileText },
       { title: "Staff", url: "/dashboard/staff", icon: CheckSquare },
       { title: "Reports", url: "/dashboard/reports", icon: BarChart },

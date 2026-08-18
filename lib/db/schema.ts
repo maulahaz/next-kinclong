@@ -76,6 +76,11 @@ export const carsTable = pgTable('cars', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const washTypesTable = pgTable('wash_types', {
+  id: serial('id').primaryKey(),
+  washType: varchar('wash_type', { length: 255 }).notNull(),
+});
+
 export const packagesTable = pgTable('packages', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -136,6 +141,8 @@ export const staffsRelations = relations(staffsTable, ({ one }) => ({
 export const packagesRelations = relations(packagesTable, ({ many }) => ({
   contracts: many(contractsTable),
 }));
+
+export const washTypesRelations = relations(washTypesTable, () => ({}));
 
 export const contractsRelations = relations(contractsTable, ({ one, many }) => ({
   customer: one(customersTable, { fields: [contractsTable.customerId], references: [customersTable.id] }),

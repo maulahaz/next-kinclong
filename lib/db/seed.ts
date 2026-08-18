@@ -27,6 +27,7 @@ async function seed() {
     await db.delete(schema.staffsTable);
     await db.delete(schema.usersTable);
     await db.delete(schema.packagesTable);
+    await db.delete(schema.washTypesTable);
     await db.delete(schema.settingsTable);
 
     // 1.5 Insert Settings
@@ -120,7 +121,21 @@ async function seed() {
     const fatimaCar2 = insertedCars[1];
     const ahmedCar = insertedCars[2];
 
-    // 4.5 Insert Packages
+    // 4.5 Insert Wash Types
+    console.log('Inserting wash types...');
+    await db.insert(schema.washTypesTable).values([
+      { washType: 'Exterior Wash' },
+      { washType: 'Interior Wash' },
+      { washType: 'Tire Dressing' },
+      { washType: 'Polishing' },
+      { washType: 'Interior Detail' },
+      { washType: 'Exterior Detail' },
+      { washType: 'Basic Waxing' },
+      { washType: 'Engine Bay Wipe' },
+      { washType: 'Window Wiping' },
+    ]);
+
+    // 4.6 Insert Packages
     console.log('Inserting packages...');
     const insertedPackages = await db.insert(schema.packagesTable).values([
       {

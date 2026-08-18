@@ -1,18 +1,16 @@
 import { requireAuth } from "@/services/auth";
-import { getAllPackages } from "@/services/packages";
 import { getAllWashTypes } from "@/services/washTypes";
-import { PackagesClientPage } from "./client-page";
+import { WashTypesClientPage } from "./client-page";
 import { redirect } from "next/navigation";
 
-export default async function PackagesPage() {
+export default async function WashTypesPage() {
   const user = await requireAuth();
 
   if (user.role !== "admin") {
     redirect("/dashboard");
   }
 
-  const packages = await getAllPackages();
   const washTypes = await getAllWashTypes();
 
-  return <PackagesClientPage packages={packages} washTypes={washTypes} />;
+  return <WashTypesClientPage washTypes={washTypes} />;
 }

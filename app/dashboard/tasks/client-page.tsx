@@ -13,10 +13,13 @@ import { Camera, CheckCircle2, Car, User, Calendar, Loader2 } from "lucide-react
 
 type WashTask = {
   id: number;
-  type: "inside" | "outside";
-  status: "pending" | "done" | "acknowledged";
-  createdAt: Date;
-  contractId: number;
+  type: string;
+  // type: "inside" | "outside";
+  // status: "pending" | "done" | "acknowledged";
+  // createdAt: Date;
+  completed: number;
+  target: number;
+  // contractId: number;
   car: {
     plateNumber: string;
     type: "small" | "big";
@@ -72,7 +75,7 @@ export function TasksClientPage({ tasks }: { tasks: WashTask[] }) {
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <Calendar className="w-4 h-4 text-primary" />
-                <span className="font-medium text-muted-foreground">Requested:</span> {new Date(task.createdAt).toLocaleDateString()}
+                <span className="font-medium text-muted-foreground">Contract Progress:</span> {task.completed}/{task.target} done
               </div>
             </CardContent>
             <CardFooter className="pt-0">
@@ -135,7 +138,7 @@ function UploadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Complete Wash #{task.id}</DialogTitle>
+          <DialogTitle>Contract ID #{task.id}</DialogTitle>
           <DialogDescription>
             Upload proof of completion for {task.car.plateNumber} ({task.type} wash).
           </DialogDescription>
@@ -143,7 +146,17 @@ function UploadDialog({
         
         <form ref={formRef} action={formAction} className="space-y-4 py-4">
           <input type="hidden" name="washId" value={task.id} />
-          
+          <div className="space-y-2">
+            <Label htmlFor="washedDate">Washed Date</Label>
+            <Input 
+              id="washedDate" 
+              name="washedDate" 
+              type="date"
+              max={new Date().toISOString().split("T")[0]}
+              required
+              className="border-primary/20"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="file">Photo Evidence</Label>
             {/* Using capture="environment" to default directly to the rear camera on mobile */}

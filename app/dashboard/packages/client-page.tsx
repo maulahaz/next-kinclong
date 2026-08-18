@@ -10,11 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { MoreHorizontal, Edit, Trash, Plus, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { shortenText } from "@/lib/utils";
 
-export function PackagesClientPage({ packages }: { packages: any[] }) {
+export function PackagesClientPage({ packages, washTypes }: { packages: any[]; washTypes: any[] }) {
   const router = useRouter();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -23,12 +24,11 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Form states
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState(30);
   const [price, setPrice] = useState(100000);
-  const [includesText, setIncludesText] = useState(""); // comma separated
+  const [selectedWashTypes, setSelectedWashTypes] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
 
   const resetForm = () => {
@@ -36,7 +36,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
     setDescription("");
     setDuration(30);
     setPrice(100000);
-    setIncludesText("");
+    setSelectedWashTypes([]);
     setIsActive(true);
     setSelectedPackage(null);
   };
@@ -47,7 +47,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
     setDescription(pkg.description || "");
     setDuration(pkg.duration);
     setPrice(pkg.price);
-    setIncludesText(Array.isArray(pkg.includes) ? pkg.includes.join(", ") : "");
+    setSelectedWashTypes(Array.isArray(pkg.includes) ? pkg.includes : []);
     setIsActive(pkg.isActive);
     setIsEditOpen(true);
   };
@@ -57,7 +57,11 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
     setIsDeleteOpen(true);
   };
 
-  const parseIncludes = (text: string) => text.split(",").map(i => i.trim()).filter(Boolean);
+  const toggleWashType = (wt: string) => {
+    setSelectedWashTypes((prev) =>
+      prev.includes(wt) ? prev.filter((x) => x !== wt) : [...prev, wt]
+    );
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +75,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
           description,
           duration,
           price,
-          includes: parseIncludes(includesText),
+          includes: selectedWashTypes,
           isActive,
         }),
       });
@@ -100,7 +104,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
           description,
           duration,
           price,
-          includes: parseIncludes(includesText),
+          includes: selectedWashTypes,
           isActive,
         }),
       });
@@ -247,7 +251,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the benefits..." />
+                <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the benefits..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -260,8 +264,23 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="includes">Included Features</Label>
-                <Input id="includes" required value={includesText} onChange={(e) => setIncludesText(e.target.value)} placeholder="Exterior wash, Waxing, Vacuum... (comma separated)" />
+                <Label>Included Features</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 bg-muted/30">
+                  {washTypes.length === 0 && (
+                    <p className="text-xs text-muted-foreground col-span-2">No wash types available. Add some first.</p>
+                  )}
+                  {washTypes.map((wt) => (
+                    <label key={wt.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedWashTypes.includes(wt.washType)}
+                        onChange={() => toggleWashType(wt.washType)}
+                        className="h-4 w-4 text-primary rounded border-input"
+                      />
+                      {wt.washType}
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center space-x-2 pt-2">
                 <input type="checkbox" id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
@@ -292,7 +311,7 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-description">Description</Label>
-                <Input id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -305,8 +324,23 @@ export function PackagesClientPage({ packages }: { packages: any[] }) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-includes">Included Features</Label>
-                <Input id="edit-includes" required value={includesText} onChange={(e) => setIncludesText(e.target.value)} placeholder="Comma separated" />
+                <Label>Included Features</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 bg-muted/30">
+                  {washTypes.length === 0 && (
+                    <p className="text-xs text-muted-foreground col-span-2">No wash types available. Add some first.</p>
+                  )}
+                  {washTypes.map((wt) => (
+                    <label key={wt.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedWashTypes.includes(wt.washType)}
+                        onChange={() => toggleWashType(wt.washType)}
+                        className="h-4 w-4 text-primary rounded border-input"
+                      />
+                      {wt.washType}
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center space-x-2 pt-2">
                 <input type="checkbox" id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
