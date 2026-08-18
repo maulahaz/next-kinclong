@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       description: body.description,
       duration: parseInt(body.duration),
       price: parseInt(body.price),
+      totalWash: parseInt(body.totalWash) || 1,
       includes: Array.isArray(body.includes) ? body.includes : [body.includes],
       popularity: parseInt(body.popularity) || 0,
       isActive: body.isActive ?? true,

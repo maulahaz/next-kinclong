@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, boolean, integer, timestamp, pgEnum, json } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, boolean, integer, timestamp, pgEnum, json, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const roleEnum = pgEnum('role', ['admin', 'staff', 'customer', 'unverified']);
@@ -87,6 +87,7 @@ export const packagesTable = pgTable('packages', {
   description: varchar('description', { length: 500 }),
   duration: integer('duration').notNull(), // e.g., days validity
   price: integer('price').notNull(),
+  totalWash: integer('total_wash').notNull().default(1), // Total washes included
   includes: json('includes').notNull(), // Example: ["Exterior wash", "Interior clean"]
   popularity: integer('popularity').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
@@ -99,6 +100,7 @@ export const contractsTable = pgTable('contracts', {
   carId: integer('car_id').references(() => carsTable.id).notNull(),
   packageId: integer('package_id').references(() => packagesTable.id), // Link to new packages table
   packageType: varchar('package_type', { length: 100 }).notNull(), // existing legacy or derived name
+  startDate: date('start_date').notNull().defaultNow(), // Contract start date
   totalWashes: integer('total_washes').notNull(),
   completedWashes: integer('completed_washes').default(0).notNull(),
   status: contractStatusEnum('status').default('active').notNull(),

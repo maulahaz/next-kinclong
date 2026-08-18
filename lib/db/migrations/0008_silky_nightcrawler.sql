@@ -1,0 +1,1 @@
+ALTER TABLE "packages" ADD COLUMN "total_wash" integer DEFAULT 1 NOT NULL;

@@ -15,6 +15,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       ...body,
       ...(body.duration !== undefined && { duration: parseInt(body.duration) }),
       ...(body.price !== undefined && { price: parseInt(body.price) }),
+      ...(body.totalWash !== undefined && { totalWash: parseInt(body.totalWash) }),
       ...(body.popularity !== undefined && { popularity: parseInt(body.popularity) }),
     });
 

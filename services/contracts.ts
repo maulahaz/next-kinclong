@@ -29,7 +29,7 @@ export async function getCustomerContracts(userId: number) {
   return contracts;
 }
 
-export async function createContract(data: { customerId: number; carId: number; packageType: string; totalWashes: number }) {
+export async function createContract(data: { customerId: number; carId: number; packageId: number; packageType: string; totalWashes: number; startDate?: string }) {
   // Business rule: One active contract per car
   const activeContracts = await db.query.contractsTable.findMany({
     where: and(
@@ -47,7 +47,9 @@ export async function createContract(data: { customerId: number; carId: number; 
     .values({
       customerId: data.customerId,
       carId: data.carId,
+      packageId: data.packageId,
       packageType: data.packageType,
+      startDate: data.startDate || new Date().toISOString().split('T')[0],
       totalWashes: data.totalWashes,
       status: "active",
       completedWashes: 0,
@@ -57,7 +59,7 @@ export async function createContract(data: { customerId: number; carId: number; 
   return contract;
 }
 
-export async function updateContract(id: number, data: { packageType?: string; totalWashes?: number; status?: "active" | "completed" | "cancelled" }) {
+export async function updateContract(id: number, data: { packageId?: number; packageType?: string; totalWashes?: number; status?: "active" | "completed" | "cancelled" }) {
   const contract = await db.query.contractsTable.findFirst({
     where: eq(contractsTable.id, id),
   });
@@ -80,6 +82,7 @@ export async function updateContract(id: number, data: { packageType?: string; t
   const [updatedContract] = await db
     .update(contractsTable)
     .set({
+      ...(data.packageId !== undefined && { packageId: data.packageId }),
       ...(data.packageType !== undefined && { packageType: data.packageType }),
       ...(data.totalWashes !== undefined && { totalWashes: data.totalWashes }),
       ...(data.status !== undefined && { status: data.status }),

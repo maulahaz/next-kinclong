@@ -28,6 +28,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState(30);
   const [price, setPrice] = useState(100000);
+  const [totalWash, setTotalWash] = useState(1);
   const [selectedWashTypes, setSelectedWashTypes] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
 
@@ -36,6 +37,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
     setDescription("");
     setDuration(30);
     setPrice(100000);
+    setTotalWash(1);
     setSelectedWashTypes([]);
     setIsActive(true);
     setSelectedPackage(null);
@@ -47,6 +49,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
     setDescription(pkg.description || "");
     setDuration(pkg.duration);
     setPrice(pkg.price);
+    setTotalWash(pkg.totalWash || 1);
     setSelectedWashTypes(Array.isArray(pkg.includes) ? pkg.includes : []);
     setIsActive(pkg.isActive);
     setIsEditOpen(true);
@@ -75,6 +78,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
           description,
           duration,
           price,
+          totalWash,
           includes: selectedWashTypes,
           isActive,
         }),
@@ -104,6 +108,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
           description,
           duration,
           price,
+          totalWash,
           includes: selectedWashTypes,
           isActive,
         }),
@@ -163,6 +168,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
               <TableRow>
                 <TableHead className="font-semibold text-foreground">Name</TableHead>
                 <TableHead className="font-semibold text-foreground bg-primary/0">Duration</TableHead>
+                <TableHead className="font-semibold text-foreground">Total Washes</TableHead>
                 <TableHead className="font-semibold text-foreground">Price (AED)</TableHead>
                 <TableHead className="font-semibold text-foreground">Features</TableHead>
                 <TableHead className="font-semibold text-foreground">Status</TableHead>
@@ -172,7 +178,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
             <TableBody>
               {packages.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                     No packages defined.
                   </TableCell>
                 </TableRow>
@@ -192,6 +198,9 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {pkg.duration} Days
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-medium text-foreground">{pkg.totalWash || 1}</span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-foreground">{pkg.price.toLocaleString()}</span>
@@ -264,6 +273,10 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                 </div>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="totalWash">Total Washes</Label>
+                <Input id="totalWash" type="number" required value={totalWash} onChange={(e) => setTotalWash(parseInt(e.target.value))} min="1" />
+              </div>
+              <div className="space-y-2">
                 <Label>Included Features</Label>
                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 bg-muted/30">
                   {washTypes.length === 0 && (
@@ -322,6 +335,10 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                   <Label htmlFor="edit-price">Price (Rp)</Label>
                   <Input id="edit-price" type="number" required value={price} onChange={(e) => setPrice(parseInt(e.target.value))} />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-totalWash">Total Washes</Label>
+                <Input id="edit-totalWash" type="number" required value={totalWash} onChange={(e) => setTotalWash(parseInt(e.target.value))} min="1" />
               </div>
               <div className="space-y-2">
                 <Label>Included Features</Label>

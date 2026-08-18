@@ -13,8 +13,9 @@ export async function createPackage(data: {
   description: string;
   duration: number;
   price: number;
+  totalWash?: number;
   includes: string[];
-  popularity: number;
+  popularity?: number;
   isActive: boolean;
 }) {
   const [newPackage] = await db
@@ -24,8 +25,9 @@ export async function createPackage(data: {
       description: data.description,
       duration: data.duration,
       price: data.price,
+      totalWash: data.totalWash ?? 1,
       includes: data.includes,
-      popularity: data.popularity,
+      popularity: data.popularity ?? 0,
       isActive: data.isActive,
     })
     .returning();
@@ -38,6 +40,7 @@ export async function updatePackage(id: number, data: {
   description?: string;
   duration?: number;
   price?: number;
+  totalWash?: number;
   includes?: string[];
   popularity?: number;
   isActive?: boolean;
@@ -55,6 +58,7 @@ export async function updatePackage(id: number, data: {
       ...(data.description !== undefined && { description: data.description }),
       ...(data.duration !== undefined && { duration: data.duration }),
       ...(data.price !== undefined && { price: data.price }),
+      ...(data.totalWash !== undefined && { totalWash: data.totalWash }),
       ...(data.includes !== undefined && { includes: data.includes }),
       ...(data.popularity !== undefined && { popularity: data.popularity }),
       ...(data.isActive !== undefined && { isActive: data.isActive }),

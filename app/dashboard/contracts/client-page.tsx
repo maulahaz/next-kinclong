@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { MoreHorizontal, Edit, Trash, Plus, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
-export function ContractsClientPage({ contracts, cars }: { contracts: any[]; cars: any[] }) {
+export function ContractsClientPage({ contracts, cars, packages }: { contracts: any[]; cars: any[]; packages: any[] }) {
   const router = useRouter();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -24,12 +24,14 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
 
   // Form states
   const [carId, setCarId] = useState("");
-  const [packageType, setPackageType] = useState("monthly");
+  const [packageId, setPackageId] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [status, setStatus] = useState<"active" | "completed" | "cancelled">("active");
 
   const resetForm = () => {
     setCarId("");
-    setPackageType("monthly");
+    setPackageId("");
+    setStartDate("");
     setStatus("active");
     setSelectedContract(null);
   };
@@ -37,7 +39,8 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
   const openEdit = (contract: any) => {
     setSelectedContract(contract);
     setCarId(contract.carId?.toString() || "");
-    setPackageType(contract.packageType);
+    setPackageId(contract.packageId?.toString() || "");
+    setStartDate(contract.startDate ? new Date(contract.startDate).toISOString().split('T')[0] : "");
     setStatus(contract.status);
     setIsEditOpen(true);
   };
@@ -59,7 +62,19 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
       return;
     }
 
-    const totalWashes = packageType === "monthly" ? 5 : 1; // Monthly = 4 outside + 1 inside
+    if (!startDate) {
+      toast.error("Please select a start date");
+      setIsLoading(false);
+      return;
+    }
+
+    // Get selected package
+    const selectedPackage = packages.find(p => p.id.toString() === packageId);
+    if (!selectedPackage) {
+      toast.error("Please select a valid package");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/contracts", {
@@ -67,8 +82,10 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
         body: JSON.stringify({
           carId: parseInt(carId),
           customerId: selectedCar.customerId,
-          packageType,
-          totalWashes,
+          packageId: parseInt(packageId),
+          packageType: selectedPackage.name,
+          totalWashes: selectedPackage.totalWash,
+          startDate: startDate, // Send as YYYY-MM-DD format
         }),
       });
       const json = await res.json();
@@ -89,10 +106,20 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
     e.preventDefault();
     setIsLoading(true);
     try {
+      // Get selected package
+      const selectedPackage = packages.find(p => p.id.toString() === packageId);
+      if (!selectedPackage) {
+        toast.error("Please select a valid package");
+        setIsLoading(false);
+        return;
+      }
+
       const res = await fetch(`/api/contracts/${selectedContract.id}`, {
         method: "PUT",
         body: JSON.stringify({
-          packageType,
+          packageId: parseInt(packageId),
+          packageType: selectedPackage.name,
+          totalWashes: selectedPackage.totalWash,
           status,
         }),
       });
@@ -151,8 +178,9 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
               <TableRow>
                 <TableHead className="font-semibold text-foreground">ID</TableHead>
                 <TableHead className="font-semibold text-foreground">Customer</TableHead>
-                <TableHead className="font-semibold text-foreground">Car (Plate)</TableHead>
+                {/* <TableHead className="font-semibold text-foreground">Car (Plate)</TableHead> */}
                 <TableHead className="font-semibold text-foreground">Package Type</TableHead>
+                <TableHead className="font-semibold text-foreground">Start Date</TableHead>
                 <TableHead className="font-semibold text-foreground">Progress</TableHead>
                 <TableHead className="font-semibold text-foreground">Status</TableHead>
                 <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
@@ -169,14 +197,17 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
               {contracts.map((contract) => (
                 <TableRow key={contract.id} className="hover:bg-primary/5 transition-colors">
                   <TableCell className="font-medium text-xs">#{contract.id}</TableCell>
-                  <TableCell>{contract.customer?.user?.name || "Unknown"}</TableCell>
+                  {/* <TableCell>{contract.customer?.user?.name || "Unknown"}</TableCell> */}
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium">{contract.car?.plateNumber}</span>
-                      <span className="text-xs text-muted-foreground capitalize">{contract.car?.type}</span>
+                      <span className="font-medium">{contract.car?.plateNumber} </span>
+                      <span className="text-xs text-muted-foreground capitalize">{contract.customer?.user?.name}- {contract.car?.type}</span>
                     </div>
                   </TableCell>
                   <TableCell className="capitalize">{contract.packageType}</TableCell>
+                  <TableCell>
+                    <span className="text-sm font-semibold">{contract.startDate}</span>
+                  </TableCell>
                   <TableCell>
                     <span className="text-sm font-semibold">{contract.completedWashes} / {contract.totalWashes}</span>
                     <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden mt-1 max-w-[100px]">
@@ -234,11 +265,17 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
               </div>
               <div className="space-y-2">
                 <Label htmlFor="package">Package Type</Label>
-                <select id="package" required value={packageType} onChange={(e) => setPackageType(e.target.value)}
+                <select id="package" required value={packageId} onChange={(e) => setPackageId(e.target.value)}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                  <option value="monthly">Monthly Pack (5 total included)</option>
-                  <option value="ondemand">On Demand</option>
+                  <option value="">Select a package</option>
+                  {packages.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.totalWash} washes)</option>
+                  ))}
                 </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Contract Start Date</Label>
+                <Input id="startDate" type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} />
               </div>
             </div>
             <DialogFooter>
@@ -266,11 +303,17 @@ export function ContractsClientPage({ contracts, cars }: { contracts: any[]; car
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-package">Package Type</Label>
-                <select id="edit-package" required value={packageType} onChange={(e) => setPackageType(e.target.value)}
+                <select id="edit-package" required value={packageId} onChange={(e) => setPackageId(e.target.value)}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                  <option value="monthly">Monthly Pack</option>
-                  <option value="ondemand">On Demand</option>
+                  <option value="">Select a package</option>
+                  {packages.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.totalWash} washes)</option>
+                  ))}
                 </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Contract Start Date</Label>
+                <Input id="startDate" type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-status">Status</Label>
