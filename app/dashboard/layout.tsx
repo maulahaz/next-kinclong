@@ -1,5 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/ui/avatar";
 import { requireAuth } from "@/services/auth";
 
 export default async function DashboardLayout({
@@ -12,17 +14,28 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar user={user} />
-      <main className="flex-1 flex flex-col min-h-screen bg-secondary/20">
-        <header className="h-16 flex items-center border-b border-border bg-background px-4 bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-          <SidebarTrigger className="text-primary hover:bg-primary/10" />
-          <h1 className="ml-4 text-foreground font-semibold">
-            Hello, {user.name}
-          </h1>
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
+          <SidebarTrigger className="size-8 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" />
+          <div className="h-5 w-px bg-border" aria-hidden="true" />
+          <Badge
+            variant="outline"
+            className="hidden h-6 border-primary/25 bg-primary/5 capitalize text-[0.7rem] font-semibold text-accent-foreground sm:inline-flex"
+          >
+            {user.role}
+          </Badge>
+          <div className="ml-auto flex items-center gap-3">
+            <span className="hidden text-sm text-muted-foreground lg:block">
+              Welcome back,{" "}
+              <span className="font-semibold text-foreground">{user.name}</span>
+            </span>
+            <Avatar name={user.name} className="size-8 border border-border bg-card" />
+          </div>
         </header>
-        <div className="flex-1 p-6 sm:p-8 max-w-[1400px] w-full mx-auto">
+        <div className="flex-1 p-5 w-full max-w-[1440px] mx-auto sm:p-6 lg:p-8">
           {children}
         </div>
-      </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

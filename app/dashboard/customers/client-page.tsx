@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
 import { MoreHorizontal, Edit, Trash, Car as CarIcon, FileText, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -179,35 +182,33 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Customer Accounts</h2>
-          <p className="text-muted-foreground mt-1">
-            View all verified clients in the Kinclong database.
-          </p>
-        </div>
-        <Button onClick={openAdd} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          <UserPlus className="w-4 h-4 mr-2" /> Add Customer
-        </Button>
-      </div>
+      <PageHeader
+        title="Customer Accounts"
+        description="View all verified clients in the Kinclong database."
+        actions={
+          <Button onClick={openAdd}>
+            <UserPlus /> Add Customer
+          </Button>
+        }
+      />
 
-      <Card className="border-primary/20 shadow-sm bg-card overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-primary/5">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Ref</TableHead>
-                <TableHead className="font-semibold text-foreground">Name</TableHead>
-                <TableHead className="font-semibold text-foreground">Phone</TableHead>
-                <TableHead className="font-semibold text-foreground">Cars</TableHead>
-                <TableHead className="font-semibold text-foreground">Packages</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableHead>Ref</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Cars</TableHead>
+                <TableHead>Packages</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {customers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                     No customers found.
                   </TableCell>
                 </TableRow>
@@ -215,21 +216,21 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
               {customers.map((customer) => {
                 const activePackages = customer.contracts?.filter((c: any) => c.status === "active").length || 0;
                 return (
-                  <TableRow key={customer.id} className="hover:bg-primary/5 transition-colors">
-                    <TableCell className="font-medium text-xs text-muted-foreground">CST-{customer.id}</TableCell>
+                  <TableRow key={customer.id} className="hover:bg-muted/40">
+                    <TableCell className="text-xs font-medium text-muted-foreground">CST-{customer.id}</TableCell>
                     <TableCell className="font-semibold text-foreground">{customer.user?.name}</TableCell>
                     <TableCell className="text-muted-foreground">{customer.user?.phone || customer.phone || "—"}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <CarIcon className="w-4 h-4 text-primary" />
+                        <CarIcon className="size-4 text-primary" />
                         {customer.cars?.length || 0}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <FileText className="w-4 h-4 text-primary" />
+                        <FileText className="size-4 text-primary" />
                         {activePackages > 0 ? (
-                          <span className="text-primary font-medium">{activePackages} active</span>
+                          <StatusBadge variant="active">{activePackages} active</StatusBadge>
                         ) : (
                           <span className="text-muted-foreground">0</span>
                         )}
@@ -237,16 +238,16 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                        <DropdownMenuTrigger render={<Button variant="ghost" className="size-8" />}>
                           <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEdit(customer)} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" /> Edit
+                          <DropdownMenuItem onClick={() => openEdit(customer)}>
+                            <Edit /> Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openDelete(customer)} className="cursor-pointer text-destructive focus:text-destructive">
-                            <Trash className="mr-2 h-4 w-4" /> Delete
+                          <DropdownMenuItem variant="destructive" onClick={() => openDelete(customer)}>
+                            <Trash /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -266,15 +267,14 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
             <DialogHeader>
               <DialogTitle>Add New Customer</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto px-1">
+            <div className="max-h-[60vh] space-y-4 overflow-y-auto py-4">
               <div className="space-y-2">
                 <Label htmlFor="userId">Select Registered User</Label>
-                <select
+                <Select
                   id="userId"
                   required
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="">— Choose an unverified user —</option>
                   {unverifiedUsers.map((u) => (
@@ -282,7 +282,7 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
                       {u.name} ({u.email || u.phone || `ID #${u.id}`})
                     </option>
                   ))}
-                </select>
+                </Select>
                 {unverifiedUsers.length === 0 && (
                   <p className="text-xs text-muted-foreground">No unverified users available. Users must register first.</p>
                 )}
@@ -339,7 +339,7 @@ export function CustomersClientPage({ customers }: { customers: any[] }) {
             <DialogHeader>
               <DialogTitle>Edit Customer</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto px-1">
+            <div className="max-h-[60vh] space-y-4 overflow-y-auto py-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Full Name</Label>
                 <Input id="edit-name" required value={editName} onChange={(e) => setEditName(e.target.value)} />

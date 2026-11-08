@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
 import { MoreHorizontal, Edit, Trash, UserPlus, Loader2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { formatDayMonth_fromDate } from "@/lib/utils";
@@ -132,50 +135,51 @@ export function StaffClientPage({ staffs }: { staffs: any[] }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Staff Management</h2>
-          <p className="text-muted-foreground mt-1">
-            Build and manage your car wash service team.
-          </p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          <UserPlus className="w-4 h-4 mr-2" /> Hire Member
-        </Button>
-      </div>
+      <PageHeader
+        title="Staff Management"
+        description="Build and manage your car wash service team."
+        actions={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <UserPlus /> New Member
+          </Button>
+        }
+      />
 
-      <Card className="border-primary/20 shadow-sm bg-card overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-primary/5">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Name</TableHead>
-                <TableHead className="font-semibold text-foreground">Position</TableHead>
-                <TableHead className="font-semibold text-foreground">Hire Date</TableHead>
-                <TableHead className="font-semibold text-foreground">Salary</TableHead>
-                <TableHead className="font-semibold text-foreground">Status</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead>Hire Date</TableHead>
+                <TableHead>Salary (IDR)</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {staffs.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                     No staff members found.
                   </TableCell>
                 </TableRow>
               )}
               {staffs.map((staff) => (
-                <TableRow key={staff.id} className="hover:bg-primary/5 transition-colors">
+                <TableRow key={staff.id} className="hover:bg-muted/40">
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-foreground">{staff.user?.name}</span>
-                      <span className="text-xs text-muted-foreground">{staff.phone}</span>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={staff.user?.name || "?"} />
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-semibold text-foreground truncate">{staff.user?.name}</span>
+                        <span className="text-xs text-muted-foreground">{staff.phone}</span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-sm">
-                      <Briefcase className="w-4 h-4 text-primary" />
+                      <Briefcase className="size-4 text-primary" />
                       {staff.position || "N/A"}
                     </div>
                   </TableCell>
@@ -186,22 +190,22 @@ export function StaffClientPage({ staffs }: { staffs: any[] }) {
                     <span className="font-medium text-foreground">IDR {staff.salary?.toLocaleString() || 0}</span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={staff.isActive ? "default" : "secondary"}>
+                    <StatusBadge variant={staff.isActive ? "active" : "disabled"}>
                       {staff.isActive ? "Active" : "Disabled"}
-                    </Badge>
+                    </StatusBadge>
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                      <DropdownMenuTrigger render={<Button variant="ghost" className="size-8" />}>
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="size-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEdit(staff)} className="cursor-pointer">
-                          <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                        <DropdownMenuItem onClick={() => openEdit(staff)}>
+                          <Edit /> Edit Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDelete(staff)} className="cursor-pointer text-destructive focus:text-destructive">
-                          <Trash className="mr-2 h-4 w-4" /> Terminate
+                        <DropdownMenuItem variant="destructive" onClick={() => openDelete(staff)}>
+                          <Trash /> Terminate
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -250,8 +254,8 @@ export function StaffClientPage({ staffs }: { staffs: any[] }) {
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+              <div className="flex items-center gap-2 pt-2">
+                <Checkbox id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                 <Label htmlFor="isActive" className="text-sm font-medium leading-none">Active Staff Member</Label>
               </div>
             </div>
@@ -303,8 +307,8 @@ export function StaffClientPage({ staffs }: { staffs: any[] }) {
                 <Label htmlFor="edit-address">Address</Label>
                 <Input id="edit-address" value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+              <div className="flex items-center gap-2 pt-2">
+                <Checkbox id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                 <Label htmlFor="edit-isActive" className="text-sm font-medium leading-none">Status: Active</Label>
               </div>
             </div>
@@ -332,7 +336,7 @@ export function StaffClientPage({ staffs }: { staffs: any[] }) {
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Comfirm Termination
+              Confirm Termination
             </Button>
           </DialogFooter>
         </DialogContent>

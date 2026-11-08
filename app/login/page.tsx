@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginWithIdentifier, registerUser } from "@/services/auth";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogIn, UserPlus, KeyRound } from "lucide-react";
+import { LogIn, UserRoundPlus, Droplets, ShieldCheck, Truck, Star } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,45 +45,94 @@ export default function LoginPage() {
           router.push("/dashboard");
         }
       }
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const seedLogins = [
-    { id: "admin@kinclong.com", label: "Admin" },
-    { id: "08111111112", label: "Staff (Phone)" },
-    { id: "08111111114", label: "Customer (Phone)" },
-  ];
-
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-secondary/30">
-      <Card className="w-full max-w-sm shadow-xl border-primary/20 bg-background overflow-hidden">
-        <CardHeader className="text-center space-y-2 bg-primary/5 pb-8">
-          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-            {isLogin ? <LogIn className="w-6 h-6 text-primary" /> : <UserPlus className="w-6 h-6 text-primary" />}
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 sm:p-6 lg:p-10">
+      <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-panel lg:grid lg:grid-cols-2">
+        {/* ── Left: brand panel ─────────────────────────────────────────── */}
+        <div className="relative hidden overflow-hidden bg-foreground p-10 text-background lg:flex lg:flex-col lg:justify-between">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-40"
+            style={{
+              background:
+                "radial-gradient(48rem 24rem at 80% -10%, rgba(226, 92, 28, 0.55), transparent 60%), radial-gradient(36rem 20rem at -10% 110%, rgba(226, 92, 28, 0.35), transparent 60%)",
+            }}
+          />
+          <div className="relative flex items-center gap-2.5">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-glow">
+              <Droplets className="size-5" />
+            </span>
+            <span className="text-lg font-bold tracking-tight">Kinclong</span>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            {isLogin ? "Welcome back" : "Create Account"}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {isLogin ? "Sign in to manage your car wash" : "Join Kinclong to book your first wash"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <div className="relative space-y-4">
+            <div className="flex items-center gap-1 text-primary">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="size-4 fill-current" />
+              ))}
+            </div>
+            <h2 className="text-3xl font-bold leading-tight tracking-tight">
+              Your car deserves
+              <span className="block text-primary">the best care.</span>
+            </h2>
+            <p className="max-w-sm text-sm leading-relaxed text-background/70">
+              Manage monthly wash packages, track every wash with photo
+              evidence, and keep your fleet spotless — all in one place.
+            </p>
+          </div>
+
+          <ul className="relative space-y-3 text-sm">
+            <li className="flex items-center gap-3">
+              <ShieldCheck className="size-4 shrink-0 text-primary" />
+              Photo evidence for every completed wash
+            </li>
+            <li className="flex items-center gap-3">
+              <Truck className="size-4 shrink-0 text-primary" />
+              Flexible packages for every vehicle type
+            </li>
+            <li className="flex items-center gap-3">
+              <Droplets className="size-4 shrink-0 text-primary" />
+              Real-time wash tracking and status
+            </li>
+          </ul>
+        </div>
+
+        {/* ── Right: form panel ─────────────────────────────────────────── */}
+        <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-12">
+          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Droplets className="size-5" />
+            </span>
+            <span className="text-lg font-bold tracking-tight text-foreground">Kinclong</span>
+          </div>
+
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {isLogin ? "Welcome back" : "Create account"}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isLogin
+              ? "Sign in to manage your car wash."
+              : "Join Kinclong to book your first wash."}
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             {!isLogin && (
-              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
                   id="name"
                   placeholder="Enter your name"
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required={!isLogin}
-                  className="border-primary/20 focus-visible:ring-primary"
                 />
               </div>
             )}
@@ -93,95 +141,60 @@ export default function LoginPage() {
               <Input
                 id="identifier"
                 placeholder="email@example.com or 08xxxx"
+                autoComplete="username"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
-                className="border-primary/20 focus-visible:ring-primary"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">{isLogin ? "" : "Create "}Password</Label>
-              {isLogin && (
-                <div className="flex items-center justify-end -mt-6 mb-1">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{isLogin ? "" : "Create "}Password</Label>
+                {isLogin && (
                   <button
                     type="button"
                     onClick={() => toast.info("Check your email or contact support to reset.")}
-                    className="text-xs text-primary hover:underline font-medium"
+                    className="text-xs font-semibold text-primary hover:underline"
                   >
                     Forgot Password?
                   </button>
-                </div>
-              )}
+                )}
+              </div>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-primary/20 focus-visible:ring-primary"
               />
             </div>
 
-
-
-            <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 shadow-[0_0_8px_rgba(46,213,115,0.4)] transition-all active:scale-95 text-white font-semibold">
+            <Button type="submit" disabled={loading} className="w-full" size="lg">
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </span>
+                <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+              ) : isLogin ? (
+                <LogIn />
               ) : (
-                isLogin ? <><LogIn className="mr-2 h-4 w-4" /> Sign In</> : <><UserPlus className="mr-2 h-4 w-4" /> Register</>
+                <UserRoundPlus />
               )}
+              {isLogin ? "Sign In" : "Register"}
             </Button>
           </form>
 
-          <div className="mt-6 flex flex-col gap-4">
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">
-                {isLogin ? "New to Kinclong?" : "Already have an account?"}
-              </span>{" "}
-              <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline font-semibold"
-              >
-                {isLogin ? "Create an account" : "Sign In"}
-              </button>
-            </div>
-
-            {/* <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-muted" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground font-medium">Quick Access</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 mt-2">
-              {seedLogins.map((s) => (
-                <Button
-                  key={s.id}
-                  variant="outline"
-                  className="border-primary/30 text-foreground hover:bg-primary/5 text-xs py-1 h-8 justify-between px-3"
-                  onClick={() => {
-                    setIdentifier(s.id);
-                    setPassword("pass-123");
-                    setIsLogin(true);
-                    setTimeout(() => document.querySelector("form")?.requestSubmit(), 100);
-                  }}
-                >
-                  <span className="font-medium">{s.label}</span>
-                  <span className="text-muted-foreground bg-primary/10 px-1.5 py-0.5 rounded text-[10px]">{s.id}</span>
-                </Button>
-              ))}
-            </div> */}
-
-          </div>
-        </CardContent>
-      </Card>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {isLogin ? "New to Kinclong?" : "Already have an account?"}{" "}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="font-semibold text-primary hover:underline"
+            >
+              {isLogin ? "Create an account" : "Sign In"}
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

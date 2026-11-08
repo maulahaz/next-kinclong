@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
 import { MoreHorizontal, Edit, Trash, Car as CarIcon, User, Plus, Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { toSentenceCase } from "@/lib/utils";
@@ -167,81 +169,80 @@ export function CarsClientPage({ cars, customers }: { cars: any[]; customers: an
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Fleet Directory</h2>
-          <p className="text-muted-foreground mt-1">
-            Browse and manage all customer registered vehicles (Cars) in the application.
-          </p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          <Plus className="w-4 h-4 mr-2" /> Register Car
-        </Button>
-      </div>
+      <PageHeader
+        title="Fleet Directory"
+        description="Browse and manage all customer registered vehicles (Cars) in the application."
+        actions={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus /> Register Car
+          </Button>
+        }
+      />
 
-      <Card className="border-primary/20 shadow-sm bg-card overflow-hidden flex flex-col items-stretch">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-primary/5">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Reg ID</TableHead>
+                <TableHead>Reg ID</TableHead>
                 {/*--Thumbnail of Car image */}
-                <TableHead className="font-semibold text-foreground">Image</TableHead>
-                <TableHead className="font-semibold text-foreground">Plate Number</TableHead>
-                <TableHead className="font-semibold text-foreground">Vehicle Type</TableHead>
-                <TableHead className="font-semibold text-foreground">Owner</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableHead>Image</TableHead>
+                <TableHead>Plate Number</TableHead>
+                <TableHead>Vehicle Type</TableHead>
+                <TableHead>Owner</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {cars.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                     No registered vehicles found.
                   </TableCell>
                 </TableRow>
               )}
               {cars.map((car) => {
                 return (
-                  <TableRow key={car.id} className="hover:bg-primary/5 transition-colors">
-                    <TableCell className="font-medium text-xs text-muted-foreground">CAR-{car.id}</TableCell>
+                  <TableRow key={car.id} className="hover:bg-muted/40">
+                    <TableCell className="text-xs font-medium text-muted-foreground">CAR-{car.id}</TableCell>
                     <TableCell>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={car.imageUrl || "/images/noimage.jpg"}
                         alt="Car"
-                        className="h-10 w-10 rounded-md object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                        className="size-10 cursor-pointer rounded-lg border border-border object-cover transition-opacity hover:opacity-80"
                         onClick={() => setZoomImage(car.imageUrl || "/images/noimage.jpg")}
                       />
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 font-bold text-foreground">
-                        <CarIcon className="w-4 h-4 text-primary shrink-0" />
+                        <CarIcon className="size-4 shrink-0 text-primary" />
                         {car.plateNumber}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="capitalize text-xs font-semibold tracking-wide border-primary/30 text-primary">
+                      <StatusBadge variant={car.type === "big" ? "pending" : "default"} className="capitalize">
                         {car.type}
-                      </Badge>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 text-sm text-foreground">
-                        <User className="w-4 h-4 text-muted-foreground" />
+                        <User className="size-4 text-muted-foreground" />
                         {car.customer?.user?.name || "Unassigned"}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0 border-none outline-none focus-visible:ring-0" />}>
+                        <DropdownMenuTrigger render={<Button variant="ghost" className="size-8" />}>
                           <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          <MoreHorizontal className="size-4 text-muted-foreground" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEdit(car)} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" /> Edit Car
+                          <DropdownMenuItem onClick={() => openEdit(car)}>
+                            <Edit /> Edit Car
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openDelete(car)} className="cursor-pointer text-destructive focus:text-destructive">
-                            <Trash className="mr-2 h-4 w-4" /> Unregister Vehicle
+                          <DropdownMenuItem variant="destructive" onClick={() => openDelete(car)}>
+                            <Trash /> Unregister Vehicle
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -268,21 +269,19 @@ export function CarsClientPage({ cars, customers }: { cars: any[]; customers: an
               </div>
               <div className="space-y-2">
                 <Label htmlFor="type">Vehicle Type</Label>
-                <select id="type" required value={carType} onChange={(e) => setCarType(e.target.value as any)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <Select id="type" required value={carType} onChange={(e) => setCarType(e.target.value as any)}>
                   <option value="small">Small</option>
                   <option value="big">Big</option>
-                </select>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="customer">Customer</Label>
-                <select id="customer" required value={customerId} onChange={(e) => setCustomerId(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <Select id="customer" required value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
                   <option value="">Select a customer</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>{toSentenceCase(c.user?.name)}</option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="border-t border-border pt-4 space-y-4">
@@ -373,11 +372,10 @@ export function CarsClientPage({ cars, customers }: { cars: any[]; customers: an
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-type">Vehicle Type</Label>
-                <select id="edit-type" required value={carType} onChange={(e) => setCarType(e.target.value as any)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <Select id="edit-type" required value={carType} onChange={(e) => setCarType(e.target.value as any)}>
                   <option value="small">Small</option>
                   <option value="big">Big</option>
-                </select>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Customer</Label>

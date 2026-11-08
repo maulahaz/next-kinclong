@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/page-header";
 import { Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +35,7 @@ export function SettingsClientPage({ settings }: { settings: any }) {
   const [facebook, setFacebook] = useState(settings?.socialMedia?.facebook || "");
   
   // Others
-  const [primaryColor, setPrimaryColor] = useState(settings?.others?.primaryColor || "#2ED573");
+  const [primaryColor, setPrimaryColor] = useState(settings?.others?.primaryColor || "#E25C1C");
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -74,28 +75,26 @@ export function SettingsClientPage({ settings }: { settings: any }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Global Settings</h2>
-          <p className="text-muted-foreground mt-1">
-            Manage your application configurations and brand details.
-          </p>
-        </div>
-        <Button onClick={handleSave} disabled={isLoading} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-          Save Changes
-        </Button>
-      </div>
+      <PageHeader
+        title="Global Settings"
+        description="Manage your application configurations and brand details."
+        actions={
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading ? <Loader2 className="animate-spin" /> : <Save />}
+            Save Changes
+          </Button>
+        }
+      />
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="mb-4 bg-card border border-border shadow-sm p-1">
-          <TabsTrigger value="general" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">General</TabsTrigger>
-          <TabsTrigger value="brand" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Brand & Assets</TabsTrigger>
-          <TabsTrigger value="localization" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Localization</TabsTrigger>
+        <TabsList className="mb-5 w-full max-w-xl justify-start overflow-x-auto">
+          <TabsTrigger value="general" className="flex-1">General</TabsTrigger>
+          <TabsTrigger value="brand" className="flex-1">Brand & Assets</TabsTrigger>
+          <TabsTrigger value="localization" className="flex-1">Localization</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
-          <Card className="border-primary/20 shadow-sm bg-card">
+          <Card>
             <CardHeader>
               <CardTitle>Company Information</CardTitle>
               <CardDescription>Primary details about your business.</CardDescription>
@@ -136,7 +135,7 @@ export function SettingsClientPage({ settings }: { settings: any }) {
         </TabsContent>
 
         <TabsContent value="brand">
-          <Card className="border-primary/20 shadow-sm bg-card">
+          <Card>
             <CardHeader>
               <CardTitle>Brand Assets</CardTitle>
               <CardDescription>Logo and visual identity settings.</CardDescription>
@@ -163,7 +162,7 @@ export function SettingsClientPage({ settings }: { settings: any }) {
         </TabsContent>
 
         <TabsContent value="localization">
-          <Card className="border-primary/20 shadow-sm bg-card">
+          <Card>
             <CardHeader>
               <CardTitle>Regional Settings</CardTitle>
               <CardDescription>Currency and timezone preferences.</CardDescription>

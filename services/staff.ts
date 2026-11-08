@@ -1,6 +1,9 @@
 import { db } from "@/lib/db";
 import { usersTable, staffsTable, washesTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt";
+
+const DEFAULT_STAFF_PASSWORD = "pass-123";
 
 export async function getAllStaffs() {
   return await db.query.staffsTable.findMany({
@@ -15,6 +18,7 @@ export async function createStaff(data: {
   name: string;
   email: string;
   phone: string;
+  password?: string;
   address?: string;
   position?: string;
   salary?: number;
@@ -32,12 +36,15 @@ export async function createStaff(data: {
   }
 
   return await db.transaction(async (tx) => {
+    const hashedPassword = await bcrypt.hash(data.password || DEFAULT_STAFF_PASSWORD, 10);
     const [user] = await tx
       .insert(usersTable)
       .values({
         name: data.name,
         email: data.email,
         role: "staff",
+        passwordHash: hashedPassword,
+        isActive: data.isActive !== false,
       })
       .returning();
 

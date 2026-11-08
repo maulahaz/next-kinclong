@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/page-header";
 import { MoreHorizontal, Edit, Trash, Plus, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -106,57 +106,55 @@ export function WashTypesClientPage({ washTypes }: { washTypes: any[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Wash Types</h2>
-          <p className="text-muted-foreground mt-1">
-            Manage the catalog of wash features used when building service packages.
-          </p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          <Plus className="w-4 h-4 mr-2" /> New Wash Type
-        </Button>
-      </div>
+      <PageHeader
+        title="Wash Types"
+        description="Manage the catalog of wash features used when building service packages."
+        actions={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus /> New Wash Type
+          </Button>
+        }
+      />
 
-      <Card className="border-primary/20 shadow-sm bg-card overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-primary/5">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">ID</TableHead>
-                <TableHead className="font-semibold text-foreground">Wash Type</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Wash Type</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {washTypes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
                     No wash types defined.
                   </TableCell>
                 </TableRow>
               )}
               {washTypes.map((wt) => (
-                <TableRow key={wt.id} className="hover:bg-primary/5 transition-colors">
+                <TableRow key={wt.id} className="hover:bg-muted/40">
                   <TableCell className="text-xs font-medium text-muted-foreground">#{wt.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 font-medium text-foreground">
-                      <Sparkles className="w-4 h-4 text-primary" />
+                      <Sparkles className="size-4 text-primary" />
                       {wt.washType}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                      <DropdownMenuTrigger render={<Button variant="ghost" className="size-8" />}>
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="size-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEdit(wt)} className="cursor-pointer">
-                          <Edit className="mr-2 h-4 w-4" /> Edit
+                        <DropdownMenuItem onClick={() => openEdit(wt)}>
+                          <Edit /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDelete(wt)} className="cursor-pointer text-destructive focus:text-destructive">
-                          <Trash className="mr-2 h-4 w-4" /> Delete
+                        <DropdownMenuItem variant="destructive" onClick={() => openDelete(wt)}>
+                          <Trash /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

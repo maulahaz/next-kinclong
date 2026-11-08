@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, Edit, Trash, Plus, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { shortenText } from "@/lib/utils";
@@ -149,46 +152,44 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Service Packages</h2>
-          <p className="text-muted-foreground mt-1">
-            Build and configure membership programs and on-demand washes.
-          </p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)] text-white">
-          <Plus className="w-4 h-4 mr-2" /> New Package
-        </Button>
-      </div>
+      <PageHeader
+        title="Service Packages"
+        description="Build and configure membership programs and on-demand washes."
+        actions={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus /> New Package
+          </Button>
+        }
+      />
 
-      <Card className="border-primary/20 shadow-sm bg-card overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-primary/5">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Name</TableHead>
-                <TableHead className="font-semibold text-foreground bg-primary/0">Duration</TableHead>
-                <TableHead className="font-semibold text-foreground">Total Washes</TableHead>
-                <TableHead className="font-semibold text-foreground">Price (AED)</TableHead>
-                <TableHead className="font-semibold text-foreground">Features</TableHead>
-                <TableHead className="font-semibold text-foreground">Status</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead className="text-center">Washes</TableHead>
+                <TableHead>Price (Rp)</TableHead>
+                <TableHead>Features</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     No packages defined.
                   </TableCell>
                 </TableRow>
               )}
               {packages.map((pkg) => (
-                <TableRow key={pkg.id} className="hover:bg-primary/5 transition-colors">
+                <TableRow key={pkg.id} className="hover:bg-muted/40">
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <Package className="w-4 h-4 text-primary" />
+                        <Package className="size-4 text-primary" />
                         {pkg.name}
                       </span>
                       <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]" title={pkg.description}>
@@ -197,7 +198,7 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {pkg.duration} Days
+                    {pkg.duration} days
                   </TableCell>
                   <TableCell className="text-center">
                     <span className="font-medium text-foreground">{pkg.totalWash || 1}</span>
@@ -208,34 +209,34 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[250px]">
                       {(pkg.includes || []).slice(0, 2).map((item: string, i: number) => (
-                        <Badge key={i} variant="outline" className="text-[10px] leading-3 py-0.5 border-primary/20 text-muted-foreground">
+                        <Badge key={i} variant="outline" className="text-[10px] leading-3 py-0.5 border-border bg-muted text-muted-foreground">
                           {item}
                         </Badge>
                       ))}
                       {(pkg.includes || []).length > 2 && (
-                        <Badge variant="outline" className="text-[10px] leading-3 py-0.5 border-primary/20 text-primary bg-primary/5">
+                        <Badge variant="outline" className="text-[10px] leading-3 py-0.5 border-primary/20 bg-primary/5 text-primary">
                           +{(pkg.includes.length - 2)} more
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={pkg.isActive ? "default" : "secondary"}>
+                    <StatusBadge variant={pkg.isActive ? "active" : "disabled"}>
                       {pkg.isActive ? "Active" : "Disabled"}
-                    </Badge>
+                    </StatusBadge>
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                      <DropdownMenuTrigger render={<Button variant="ghost" className="size-8" />}>
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="size-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEdit(pkg)} className="cursor-pointer">
-                          <Edit className="mr-2 h-4 w-4" /> Edit Feature
+                        <DropdownMenuItem onClick={() => openEdit(pkg)}>
+                          <Edit /> Edit Package
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDelete(pkg)} className="cursor-pointer text-destructive focus:text-destructive">
-                          <Trash className="mr-2 h-4 w-4" /> Delete
+                        <DropdownMenuItem variant="destructive" onClick={() => openDelete(pkg)}>
+                          <Trash /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -284,19 +285,17 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                   )}
                   {washTypes.map((wt) => (
                     <label key={wt.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedWashTypes.includes(wt.washType)}
                         onChange={() => toggleWashType(wt.washType)}
-                        className="h-4 w-4 text-primary rounded border-input"
                       />
                       {wt.washType}
                     </label>
                   ))}
                 </div>
               </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+              <div className="flex items-center gap-2 pt-2">
+                <Checkbox id="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                 <Label htmlFor="isActive" className="text-sm font-medium leading-none">Activate Package immediately</Label>
               </div>
             </div>
@@ -348,19 +347,17 @@ export function PackagesClientPage({ packages, washTypes }: { packages: any[]; w
                   )}
                   {washTypes.map((wt) => (
                     <label key={wt.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedWashTypes.includes(wt.washType)}
                         onChange={() => toggleWashType(wt.washType)}
-                        className="h-4 w-4 text-primary rounded border-input"
                       />
                       {wt.washType}
                     </label>
                   ))}
                 </div>
               </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <input type="checkbox" id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 text-primary rounded border-input" />
+              <div className="flex items-center gap-2 pt-2">
+                <Checkbox id="edit-isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                 <Label htmlFor="edit-isActive" className="text-sm font-medium leading-none">Package Active</Label>
               </div>
             </div>

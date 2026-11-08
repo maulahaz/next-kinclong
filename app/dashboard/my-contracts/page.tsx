@@ -2,6 +2,7 @@ import { requireAuth } from "@/services/auth";
 import { getCustomerContracts } from "@/services/contracts";
 import { MyContractsClientPage } from "./client-page";
 import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/page-header";
 
 export default async function MyContractsPage() {
   const user = await requireAuth();
@@ -15,12 +16,15 @@ export default async function MyContractsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">My Contracts</h2>
-        <p className="text-muted-foreground">
-          Track your remaining wash quotas across all packages and view wash evidence.
-        </p>
-      </div>
+      <PageHeader
+        title="My Contracts"
+        description="Track your remaining wash quotas across all packages and view wash evidence."
+        actions={
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            {contracts.length} package{contracts.length === 1 ? "" : "s"}
+          </span>
+        }
+      />
 
       <MyContractsClientPage contracts={contracts} />
     </div>

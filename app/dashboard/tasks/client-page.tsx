@@ -8,18 +8,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, Car, User, Calendar, Loader2 } from "lucide-react";
+import { Camera, CheckCircle2, Car, User, Loader2, ClipboardList } from "lucide-react";
 
 type WashTask = {
   id: number;
   type: string;
-  // type: "inside" | "outside";
-  // status: "pending" | "done" | "acknowledged";
-  // createdAt: Date;
   completed: number;
   target: number;
-  // contractId: number;
   car: {
     plateNumber: string;
     type: "small" | "big";
@@ -34,81 +31,86 @@ export function TasksClientPage({ tasks }: { tasks: WashTask[] }) {
 
   if (!tasks.length) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 bg-background rounded-xl border border-border shadow-sm text-center">
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-8 h-8 text-primary" />
-        </div>
-        <h3 className="text-xl font-bold text-foreground">All Caught Up!</h3>
-        <p className="text-muted-foreground mt-2 max-w-sm">
-          There are no pending wash tasks assigned to the queue. Keep up the great work!
-        </p>
-      </div>
+      <EmptyState
+        icon={CheckCircle2}
+        title="All caught up!"
+        description="There are no pending wash tasks assigned to the queue. Keep up the great work!"
+      />
     );
   }
 
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {tasks.map((task) => (
-          <Card key={task.id} className="border-primary/20 shadow-sm flex flex-col justify-between">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start mb-2">
-                <Badge variant={task.type === "inside" ? "secondary" : "default"} className="uppercase tracking-wider">
-                  {task.type} Wash
-                </Badge>
-                <div className="text-xs text-muted-foreground font-medium">
-                  ID: #{task.id}
+        {tasks.map((task) => {
+          const progress = task.target > 0 ? Math.round((task.completed / task.target) * 100) : 0;
+          return (
+            <Card key={task.id} className="justify-between transition-shadow hover:shadow-card-hover">
+              <CardHeader className="pb-1">
+                <div className="flex justify-between items-center mb-3">
+                  <Badge variant="outline" className="h-6 gap-1.5 border-primary/20 bg-primary/5 font-semibold capitalize text-primary">
+                    <ClipboardList className="size-3" />
+                    {task.type}
+                  </Badge>
+                  <div className="text-xs font-medium text-muted-foreground">
+                    #{task.id}
+                  </div>
                 </div>
-              </div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Car className="w-4 h-4 text-primary" />
-                {task.car.plateNumber}
-              </CardTitle>
-              <CardDescription className="capitalize">
-                {task.car.type} Car
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm pb-4">
-              <div className="flex items-center gap-2 text-foreground">
-                <User className="w-4 h-4 text-primary" />
-                <span className="font-medium text-muted-foreground">Owner:</span> {task.customer.name}
-              </div>
-              <div className="flex items-center gap-2 text-foreground">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="font-medium text-muted-foreground">Contract Progress:</span> {task.completed}/{task.target} done
-              </div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button 
-                className="w-full bg-primary hover:bg-primary/90 shadow-[0_4px_10px_rgba(46,213,115,0.2)]" 
-                onClick={() => setSelectedTask(task)}
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                Upload Evidence
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Car className="size-4.5 text-primary" />
+                  {task.car.plateNumber}
+                </CardTitle>
+                <CardDescription className="capitalize">
+                  {task.car.type} car
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2.5 text-sm pb-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <User className="size-4 text-muted-foreground/70" />
+                  <span className="truncate">{task.customer.name}</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Contract progress</span>
+                    <span className="font-semibold tabular-nums text-foreground">{task.completed}/{task.target}</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="pb-4">
+                <Button className="w-full" onClick={() => setSelectedTask(task)}>
+                  <Camera />
+                  Upload Evidence
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
 
       {selectedTask && (
-        <UploadDialog 
-          task={selectedTask} 
-          open={!!selectedTask} 
-          onOpenChange={(open) => !open && setSelectedTask(null)} 
+        <UploadDialog
+          task={selectedTask}
+          open={!!selectedTask}
+          onOpenChange={(open) => !open && setSelectedTask(null)}
         />
       )}
     </>
   );
 }
 
-function UploadDialog({ 
-  task, 
-  open, 
-  onOpenChange 
-}: { 
-  task: WashTask; 
-  open: boolean; 
+function UploadDialog({
+  task,
+  open,
+  onOpenChange
+}: {
+  task: WashTask;
+  open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
   const [state, formAction, isPending] = useActionState(submitWashEvidence, null);
@@ -136,57 +138,57 @@ function UploadDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle>Contract ID #{task.id}</DialogTitle>
+          <DialogTitle>Complete wash #{task.id}</DialogTitle>
           <DialogDescription>
-            Upload proof of completion for {task.car.plateNumber} ({task.type} wash).
+            Upload proof of completion for {task.car.plateNumber} ({task.type}).
           </DialogDescription>
         </DialogHeader>
-        
-        <form ref={formRef} action={formAction} className="space-y-4 py-4">
+
+        <form ref={formRef} action={formAction} className="space-y-4 py-2">
           <input type="hidden" name="washId" value={task.id} />
           <div className="space-y-2">
             <Label htmlFor="washedDate">Washed Date</Label>
-            <Input 
-              id="washedDate" 
-              name="washedDate" 
+            <Input
+              id="washedDate"
+              name="washedDate"
               type="date"
               max={new Date().toISOString().split("T")[0]}
               required
-              className="border-primary/20"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="file">Photo Evidence</Label>
             {/* Using capture="environment" to default directly to the rear camera on mobile */}
-            <Input 
-              id="file" 
-              name="file" 
-              type="file" 
-              accept="image/*" 
-              capture="environment" 
+            <Input
+              id="file"
+              name="file"
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={handleFileChange}
               required
-              className="cursor-pointer border-primary/20"
+              className="cursor-pointer pt-2 file:mr-2 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:text-xs file:font-semibold file:text-primary"
             />
           </div>
 
           {preview && (
-            <div className="mt-4 rounded-lg overflow-hidden border border-border shadow-sm flex items-center justify-center bg-secondary/30 h-48">
-              <img src={preview} alt="Upload Preview" className="object-cover w-full h-full" />
+            <div className="mt-2 overflow-hidden rounded-xl border border-border bg-secondary/40 shadow-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="Upload Preview" className="h-48 w-full object-cover" />
             </div>
           )}
 
-          <DialogFooter className="mt-6 pt-4 border-t border-border">
+          <DialogFooter className="mt-4 border-t border-border pt-5">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending || !preview} className="bg-primary hover:bg-primary/90">
+            <Button type="submit" disabled={isPending || !preview}>
               {isPending ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</>
+                <><Loader2 className="animate-spin" /> Uploading…</>
               ) : (
-                <><CheckCircle2 className="mr-2 h-4 w-4" /> Confirm & Complete</>
+                <><CheckCircle2 /> Confirm & Complete</>
               )}
             </Button>
           </DialogFooter>
